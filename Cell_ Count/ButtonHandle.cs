@@ -78,9 +78,10 @@ namespace Cell__Count
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 if(myRects.Count > 0) { Clear_all(); }  // 画布不干净则清空画布
-                this.myFile.File_BasePath = dialog.FileName;
+                //this.myFile.File_BasePath = dialog.FileName;
+                this.myFile.File_BasePath= System.IO.Path.GetDirectoryName(dialog.FileName);
                 this.myFile.File_Name = dialog.SafeFileName;  // 更新当前文件名
-                this.myFile.Image_Path = this.myFile.File_BasePath;
+                this.myFile.Image_Path = dialog.FileName;
                 this.myFile.Len = 1;
                 this.myFile.Checked_Num = 0;
                 this.myFile.Cur_Pos = 0;
@@ -191,6 +192,7 @@ namespace Cell__Count
         {
             Clear_Rect();   // 删除矩形
             myCellInfos.Clear();    // 清空存储的细胞信息
+            this.CurCellNum.Text = 0.ToString();     // 更新当前图像细胞数
         }
 
         /// <summary>
@@ -246,6 +248,7 @@ namespace Cell__Count
             string xml_path = directoryPath + "\\" + MainWindow.XML_Path + "\\" + fileName + ".xml";
             if (!File.Exists(xml_path))  // 检查xml文件是否存在
             {
+                Clear_all();
                 ShowPopup("当前图像还未计数…");
                 return;
             }
@@ -351,7 +354,7 @@ namespace Cell__Count
                     this.myFile.Image_Path= curFileName;    // 更新UI显示图片
                     this.myFile.File_Name = file;           // 更新当前文件名
                     curCellNum = algorithm._solve(curFileName);
-                    this.CurCellNum.Text = (curCellNum + i++).ToString();     // 更新当前图像细胞数
+                    this.CurCellNum.Text = curCellNum.ToString();     // 更新当前图像细胞数
                     myFile.Checked_Num++;
                     myFile.Progress = (int)(100 * (double)myFile.Checked_Num / myFile.Len);
                     await Task.Delay(100);
@@ -361,7 +364,8 @@ namespace Cell__Count
             // 单个模式
             else
             {
-                algorithm._solve(this.myFile.File_BasePath);
+                curCellNum = algorithm._solve(this.myFile.Image_Path);
+                this.CurCellNum.Text = curCellNum.ToString();     // 更新当前图像细胞数
                 myFile.Checked_Num++;
                 myFile.Progress = (int)(100 * (double)myFile.Checked_Num / myFile.Len);
                 await Task.Delay(100);
