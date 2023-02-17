@@ -1,0 +1,354 @@
+﻿<Window x:Class="Cell__Count.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Cell__Count"
+        mc:Ignorable="d"
+        
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"        
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        
+        Title="MainWindow" Height="768" Width="1024"  WindowStyle="None"  ResizeMode="NoResize" AllowsTransparency="True" Background="Transparent">
+    <Border Background="Transparent">
+        <Border Background="LightBlue"  CornerRadius="30" x:Name="mainWindow">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"></RowDefinition>
+                    <RowDefinition Height="5*"></RowDefinition>
+                    <RowDefinition Height="1*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Popup x:Name="popup" Width="200" Height="50" Placement="Center" PlacementTarget ="{Binding ElementName=MainWindow}"  StaysOpen="false">
+                    <Border Background="Black" BorderBrush="White" BorderThickness="2">
+                        <TextBlock x:Name="popupText" TextWrapping="Wrap" Text="This is a popup!" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                </Popup>
+                <Border Background="Transparent" x:Name="Top">
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"></ColumnDefinition>
+                            <ColumnDefinition Width="2*"></ColumnDefinition>
+                            <ColumnDefinition Width="1*"></ColumnDefinition>
+                            <ColumnDefinition Width="2*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <Image Width="50" Height="50" Source="/Assets/icon.png"/>
+                        </Grid>
+
+                        <Grid Grid.Column="2" HorizontalAlignment="Left">
+                            <materialDesign:Card
+                          Width="auto"
+                          Padding="8"
+                          Background="Transparent"
+                          Foreground="Black"
+                          UniformCornerRadius="8">
+                                <TextBlock FontSize="20"  FontFamily="STCAIYUN" FontWeight="Bold" Text="细 胞 计 数 系 统" VerticalAlignment="Center"/>
+                            </materialDesign:Card>
+                        </Grid>
+                        <Grid Grid.Column="3">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="1"
+                              IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                              Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                              ToolTip="最小化"
+                              Width="30"
+                              Height="30"
+                              x:Name="btn_min"
+                             Background="#FF96BEB5">
+                                    <materialDesign:PackIcon Kind="ChevronDown" Width="30" Height="30"  Foreground="#2b5048"/>
+                                </Button>
+                                <Button
+                                Grid.Column="2"
+                              IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                              Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                              ToolTip="大小变化"
+                              Width="30"
+                              Height="30"
+                                x:Name="btn_max"
+                                Background="#FF96BEB5">
+                                    <materialDesign:PackIcon Kind="CheckboxBlankOutline" Width="20" Height="20" Foreground="#2b5048"/>
+                                </Button>
+                                <Button
+                                Grid.Column="3"
+                              IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                              Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                              ToolTip="关闭"
+                              Width="30"
+                              Height="30"
+                                x:Name="btn_close"
+                                Background="#FF96BEB5">
+                                    <materialDesign:PackIcon Kind="CloseThick" Width="20" Height="20" Foreground="#2b5048"/>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                        <ColumnDefinition Width="3*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="模式选择" VerticalAlignment="Center" FontSize="14" Margin="10,0,0,0"/>
+                            <ListBox HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1"
+                              x:Name="ModeChoice"
+                                     SelectionChanged="ModeChoice_SelectionChanged"
+                              Style="{StaticResource MaterialDesignChoiceChipPrimaryOutlineListBox}">
+                               <ListBoxItem Content="批量模式" FontWeight="Bold" Margin="0,0,10,0" ToolTip="自动检测所选目录中所有图像的细胞数目"/>
+                                <ListBoxItem Content="单个模式" FontWeight="Bold"  IsSelected="True" ToolTip="检测所选特定图像的细胞数目"/>
+                            </ListBox>
+                        </Grid>
+                        <Border CornerRadius="10" Grid.Row ="1"  Height="auto" BorderThickness="1" BorderBrush="#FF5C8893" Margin="2"/>
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid HorizontalAlignment="Center">
+                                <CheckBox
+                                    IsChecked="False"
+                                    IsEnabled="False"
+                                    FontWeight="Bold"
+                                    FontSize="14"
+                                    Margin="0,0,10,0"
+                                    Style="{StaticResource MaterialDesignFilterChipAccentCheckBox}">
+                                    图像处理选择区
+                                </CheckBox>
+                            </Grid>
+                            <Grid Grid.Row="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="输入图像目录" Margin="10,0,0,0" VerticalAlignment="Bottom" FontSize="12"/>
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                                        <ColumnDefinition Width="10"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button
+                                      Grid.Row="1"
+                                      Grid.Column="0"
+                                      Name="InputImage"
+                                      Click="InputImage_Click"
+                                      Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"
+                                      ToolTip="选择待计数细胞图像所在目录"
+                                      Padding="2"
+                                      Margin="5"
+                                      Width="auto"
+                                      Height="24"
+                                      IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}">
+                                      <TextBlock
+                                      FontWeight="Bold"
+                                      Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                      Text="选择目录" />
+                                    </Button>
+                                    <Border Grid.Row="1" Height="24" Grid.Column="2" Name="filePath" BorderThickness="1" BorderBrush="#FF5E7A14" Margin="2">
+                                        <TextBox Name="InputImage_Text" Text="" Padding="5"  Height="24"  HorizontalAlignment="Center" Width="{Binding Path=ActualWidth,ElementName=filePath}" />
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Border CornerRadius="10" Grid.Row ="2"  Height="auto" BorderThickness="1" BorderBrush="#FF5C8893" Margin="2"/>
+                        <Grid Grid.Row="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid HorizontalAlignment="Center">
+                                <CheckBox
+                                    IsChecked="False"
+                                    IsEnabled="False"
+                                    FontWeight="Bold"
+                                    FontSize="14"
+                                    Margin="0,0,10,0"
+                                    Style="{StaticResource MaterialDesignFilterChipAccentCheckBox}">
+                                    结果查看选择区
+                                </CheckBox>
+                            </Grid>
+                            <Grid Grid.Row="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="50"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="输入图像目录" Margin="10,0,0,10" VerticalAlignment="Bottom" FontSize="12"/>
+                                <Grid Grid.Row="2" VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                                        <ColumnDefinition Width="10"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button
+                                        VerticalAlignment="Top"
+                                      Grid.Row="1"
+                                      Grid.Column="0"
+                                      Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"
+                                      ToolTip="选择要查看的细胞图像所在目录"
+                                      x:Name="CheckImage"
+                                      Click="CheckImage_Click"
+                                      Padding="2"
+                                      Margin="5"
+                                      Width="auto"
+                                      Height="24"
+                                      IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}">
+                                        <TextBlock
+                                      FontWeight="Bold"
+                                      Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                      Text="选择目录" />
+                                    </Button>
+                                    <Border VerticalAlignment="Top" Grid.Row="1" Height="24" Grid.Column="2" BorderThickness="1" BorderBrush="#FF5E7A14" Margin="2">
+                                        <TextBox x:Name="CheckImage_Text" Text="" Padding="5"  Height="24"  HorizontalAlignment="Center" Width="{Binding Path=ActualWidth,ElementName=filePath}" VerticalAlignment="Top" />
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid Grid.Row="3">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
+                                <Button Grid.Column="0"
+                                  IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                                  Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                                  ToolTip="显示上一张图像"
+                                  x:Name="Pre_Image"
+                                   Click="Pre_Image_Click"
+                                  Width="30"
+                                  Height="30"
+                                 Background="#FF96BEB5">
+                                    <materialDesign:PackIcon Kind="SkipPrevious" Width="30" Height="30"  Foreground="#2b5048"/>
+                                </Button>
+                                <TextBlock Padding="0,0,0,10" Grid.Row="1" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center" Text="上一个"/>
+                                <Button Grid.Column="1"
+                                  IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                                  Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                                  ToolTip="显示下一张图像"
+                                  x:Name="Next_Image"
+                                  Click="Next_Image_Click"
+                                  Width="30"
+                                  Height="30"
+                                 Background="#FF96BEB5">
+                                    <materialDesign:PackIcon Kind="SkipNext" Width="30" Height="30"  Foreground="#2b5048"/>
+                                </Button>
+                                <TextBlock Padding="0,0,0,10" Grid.Row="1" Grid.Column="1" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center" Text="下一个"/>
+                            </Grid>
+                            <Grid Grid.Row="1">
+                                <Button
+                                    x:Name="Btn_Run"
+                                    Click="Btn_Run_Click"
+                                    Height="50"
+                                    Width="100"
+                                    materialDesign:ButtonAssist.CornerRadius="25"
+                                    IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                                    Background="#FF65777B"
+                                    ToolTip="请首先确认模式与目录类型一致">
+                                    <TextBlock Text="开始计数" FontSize="16" FontWeight="Bold"/>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <TextBlock Margin="10" x:Name="textBlock">
+                            <Canvas x:Name="MyCanvas">
+                                <Image Width="{Binding ActualWidth, ElementName=textBlock, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=textBlock, Mode=OneWay}" Stretch="Fill" x:Name="Img" Source="C:\Users\倪陆\Desktop\毕业设计\细胞样例\photo_1.jpg">
+                                    <!--<Image.Source  >
+                                        <BitmapImage UriSource="C:\Users\倪陆\Desktop\毕业设计\细胞样例\photo_1.jpg"/>
+                                    </Image.Source>-->
+                                </Image>
+                            </Canvas>
+                        </TextBlock>
+                    </Grid>
+                </Grid>
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" x:Name="batch_mode">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.5*"/>
+                            <ColumnDefinition Width="4*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Border CornerRadius="20" Grid.Column ="0" Grid.ColumnSpan="2"  Height="auto" BorderThickness="1" BorderBrush="#FF5C8893" Margin="2"/>
+                            <TextBlock Text="当前正在检测" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Right" Margin="10,0,0,0"/>
+                            <TextBlock x:Name="CurFileName" Grid.Column="1" Text="photo_4.jpg" FontSize="14" FontWeight="Bold" Foreground="#FF4E5162" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </Grid>
+                        <Grid Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="5"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="检测进度" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" Margin="10,0,10,0"/>
+                            <ProgressBar Grid.Column="1" materialDesign:TransitionAssist.DisableTransitions="True" Value="0" Background="AntiqueWhite" Foreground="#FF647B65" x:Name="Pros_Bar"/>
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="1" x:Name="single_mode">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Border CornerRadius="20" Grid.Column ="0" Grid.ColumnSpan="2"  Height="auto" BorderThickness="1" BorderBrush="#FF5C8893" Margin="2"/>
+                            <TextBlock Text="已检测图像数" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Right" Margin="10,0,0,0"/>
+                            <TextBlock x:Name="CheckedNum" Grid.Column="1" Text="0" FontSize="14" FontWeight="Bold" Foreground="#FF4E5162" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </Grid>
+                        <Grid Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Border CornerRadius="20" Grid.Column ="0" Grid.ColumnSpan="2"  Height="auto" BorderThickness="1" BorderBrush="#FF5C8893" Margin="2"/>
+                            <TextBlock Text="当前图像细胞数" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Right" Margin="10,0,0,0"/>
+                            <TextBlock x:Name="CurCellNum" Grid.Column="1" Text="0" FontSize="14" FontWeight="Bold" Foreground="#FF4E5162" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+    </Border>
+</Window>
