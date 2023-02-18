@@ -339,6 +339,13 @@ namespace Cell__Count
             int i = 0;
             if (!CheckValid()) return;
             Algorithm algorithm = new Algorithm();
+            Algorithm.MyDelegate myFunction = null; // 新建委托实例
+            ComboBoxItem selectedItem = ModeComboBox.SelectedItem as ComboBoxItem;
+            string mode = selectedItem.Content.ToString();
+            if(mode == "连通域分割")
+                myFunction = new Algorithm.MyDelegate(algorithm.Connected_solve);
+            else
+                myFunction = new Algorithm.MyDelegate(algorithm.Water_Algorithm_solve);
             // 检查是否存在存储XML信息文件夹，若不存在则创建
             string folderPath = myFile.File_BasePath+"\\" + XML_Path;
             if (!Directory.Exists(folderPath))
@@ -353,7 +360,7 @@ namespace Cell__Count
                     curFileName = myFile.File_BasePath + "//" + file;
                     this.myFile.Image_Path= curFileName;    // 更新UI显示图片
                     this.myFile.File_Name = file;           // 更新当前文件名
-                    curCellNum = algorithm._solve(curFileName);
+                    curCellNum = algorithm._solve(myFunction,curFileName);
                     this.CurCellNum.Text = curCellNum.ToString();     // 更新当前图像细胞数
                     myFile.Checked_Num++;
                     myFile.Progress = (int)(100 * (double)myFile.Checked_Num / myFile.Len);
@@ -364,13 +371,37 @@ namespace Cell__Count
             // 单个模式
             else
             {
-                curCellNum = algorithm.Water_Algorithm_solve(this.myFile.Image_Path);
+                curCellNum = algorithm._solve(myFunction,this.myFile.Image_Path);
                 this.CurCellNum.Text = curCellNum.ToString();     // 更新当前图像细胞数
                 myFile.Checked_Num++;
                 myFile.Progress = (int)(100 * (double)myFile.Checked_Num / myFile.Len);
                 await Task.Delay(100);
             }
             ShowPopup("计数已完成");
+        }
+
+        /// <summary>
+        /// 算法下拉框更改提示
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (myFile == null) return;    // 刚进入软件时无需显示此消息
+            ComboBoxItem selectedItem = ModeComboBox.SelectedItem as ComboBoxItem;
+            string mode = selectedItem.Content.ToString();
+            // 根据选择的模式执行相应操作
+            switch (mode)
+            {
+                case "连通域分割":
+                    ShowPopup("当前所用算法基于连通域分割，速度较快但误差较大");
+                    break;
+                case "分水岭分割":
+                    ShowPopup("当前所用算法基于分水岭分割，对于特定图像准确率有所提高，但速度较慢");
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

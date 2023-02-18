@@ -13,11 +13,30 @@ namespace Cell__Count
     public class Algorithm
     {
         /// <summary>
+        /// 委托，用于指向不同的计数算法
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public delegate int MyDelegate(string message);
+
+        /// <summary>
+        /// 入口函数
+        /// </summary>
+        /// <param name="myDelegate"></param>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public int _solve(MyDelegate myDelegate,string filename)
+        {
+            return myDelegate(filename);
+        }
+
+        /// <summary>
         /// 创建、保存XML文件
         /// </summary>
         /// <param name="filename">图像文件名</param>
         /// <param name="info">细胞信息</param>
         /// <param name="n">细胞个数</param>
+        /// 
         private int sava_XML(string filename,Mat info,int n,int winsize)
         {
             XmlDocument doc = new XmlDocument();    // 获取操作XML的doc元素
@@ -63,7 +82,7 @@ namespace Cell__Count
         /// </summary>
         /// <param name="filename">细胞图像路径</param>
         /// <returns></returns>
-        public int _solve(string filename) {
+        public int Connected_solve(string filename) {
             Mat img = new Mat(filename, ImreadModes.Color);
             Mat src = new Mat();
             Cv2.CvtColor(img, src, ColorConversionCodes.BGR2GRAY);
@@ -81,7 +100,13 @@ namespace Cell__Count
             return cellCount -  dropnum;
         }
 
-        private void Water_Save_XML(string filename,Mat info , int n)
+        /// <summary>
+        /// 分水岭算法运算结果信息保存函数
+        /// </summary>
+        /// <param name="filename">文件名</param>
+        /// <param name="info">细胞信息</param>
+        /// <param name="n">细胞数</param>
+        private int Water_Save_XML(string filename,Mat info , int n)
         {
             XmlDocument doc = new XmlDocument();    // 获取操作XML的doc元素
             XmlDeclaration xmldecl = doc.CreateXmlDeclaration("1.0", "utf-8", null);    // 设置xml文件头部信息
@@ -90,12 +115,14 @@ namespace Cell__Count
             XmlElement root = doc.CreateElement("CELLS");
             // 添加根元素到 XmlDocument 对象
             doc.AppendChild(root);
+            int sub = 1;
             for (int i = 0; i < n; i++)
             {
                 int x = (int)info.At<int>(i, 0);   //左上角x坐标
                 int y = (int)info.At<int>(i, 1);   //左上角y坐标
                 int width = (int)info.At<int>(i, 2);   //细胞宽
                 int height = (int)info.At<int>(i, 3);  // 细胞高
+                if (x < 0 || y < 0 || width < 0 || height < 0) { sub++; continue; }
                 // 创建子节点
                 XmlElement CELL = doc.CreateElement("CELL");
                 // 创建子节点中的元素
@@ -107,12 +134,18 @@ namespace Cell__Count
                 // 将子节点添加至根节点中
                 root.AppendChild(CELL);
             }
-            root.SetAttribute("COUNT", (n - 1).ToString());
+            root.SetAttribute("COUNT", (n - sub).ToString());
             string directoryPath = Path.GetDirectoryName(filename); // 获取文件目录
             string fileName = Path.GetFileNameWithoutExtension(filename);   // 获取文件名(不带后缀)
             string xml_path = directoryPath + "\\" + MainWindow.XML_Path + "\\" + fileName + ".xml";
             doc.Save(xml_path); // 将细胞信息保存至磁盘
+            return sub;
         }
+        /// <summary>
+        /// 分水岭算法运算逻辑
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         public int Water_Algorithm_solve(string filename)
         {
             Mat image = new Mat(filename, ImreadModes.Color);
@@ -149,18 +182,10 @@ namespace Cell__Count
             Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(3, 3));
             Mat binary_dilate = new Mat();
             Cv2.Erode(binary, binary_dilate, kernel, iterations: 1);
-
             Mat unknown = binary_dilate - sure_fg;
-
-            for (int i = 0; i < unknown.Rows; i++)
-            {
-                for (int j = 0; j < unknown.Cols; j++)
-                {
-                    // 未知区域标记为0
-                    if (unknown.At<int>(i, j) == 255)
-                        labels.At<int>(i, j) = 0;
-                }
-            }
+            // 未知区域标记为0
+            Cv2.Threshold(unknown, unknown, thresh: 254, maxval: 0, type: ThresholdTypes.TozeroInv);
+            labels.SetTo(0, unknown);
             // 区域标记结果
             Mat markers_show = labels.ConvertScaleAbs(100);
 
@@ -192,8 +217,8 @@ namespace Cell__Count
                 info.At<int>(i - 1, 3) = boundingRect.Height; // 外接矩形高
             }
             int winsize = image.Width * image.Height;
-            Water_Save_XML(filename, info, (int)max_val);
-            return (int)max_val - 1;
+            int sub = Water_Save_XML(filename, info, (int)max_val);
+            return (int)max_val - sub;
         }
     }
 }

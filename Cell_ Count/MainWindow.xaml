@@ -268,7 +268,22 @@
                                 <TextBlock Padding="0,0,0,10" Grid.Row="1" Grid.Column="1" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center" Text="下一个"/>
                             </Grid>
                             <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <ComboBox
+                                    Margin="10,0,0,0"
+                                     x:Name="ModeComboBox"
+                                      SelectionChanged="ComboBox_SelectionChanged"
+                                      Width="auto"
+                                      materialDesign:HintAssist.Hint="请选择算法"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                                    <ComboBoxItem Content="连通域分割" IsSelected="true"/>
+                                    <ComboBoxItem Content="分水岭分割"/>
+                                </ComboBox>
                                 <Button
+                                    Grid.Column="1"
                                     x:Name="Btn_Run"
                                     Click="Btn_Run_Click"
                                     Height="50"
@@ -286,9 +301,6 @@
                         <TextBlock Margin="10" x:Name="textBlock">
                             <Canvas x:Name="MyCanvas">
                                 <Image Width="{Binding ActualWidth, ElementName=textBlock, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=textBlock, Mode=OneWay}" Stretch="Fill" x:Name="Img" Source="C:\Users\倪陆\Desktop\毕业设计\细胞样例\photo_1.jpg">
-                                    <!--<Image.Source  >
-                                        <BitmapImage UriSource="C:\Users\倪陆\Desktop\毕业设计\细胞样例\photo_1.jpg"/>
-                                    </Image.Source>-->
                                 </Image>
                             </Canvas>
                         </TextBlock>
