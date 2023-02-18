@@ -255,9 +255,9 @@ namespace Cell__Count
             XmlDocument doc = new XmlDocument();    // 创建一个 XmlDocument 对象
             doc.Load(xml_path);   // 读取 XmlDocument 对象
             XmlNode xn = doc.SelectSingleNode("CELLS");
-            this.CurCellNum.Text = xn.Attributes["COUNT"].Value;    // 当前细胞总数
             XmlNodeList cells = xn.ChildNodes;   // 所有细胞信息
             Clear_all();
+            this.CurCellNum.Text = xn.Attributes["COUNT"].Value;    // 当前细胞总数
             Rectangle currect = new Rectangle();
             foreach (XmlNode cell in cells)
             {
@@ -364,7 +364,7 @@ namespace Cell__Count
             // 单个模式
             else
             {
-                curCellNum = algorithm._solve(this.myFile.Image_Path);
+                curCellNum = algorithm.Water_Algorithm_solve(this.myFile.Image_Path);
                 this.CurCellNum.Text = curCellNum.ToString();     // 更新当前图像细胞数
                 myFile.Checked_Num++;
                 myFile.Progress = (int)(100 * (double)myFile.Checked_Num / myFile.Len);
