@@ -74,7 +74,7 @@ namespace Cell__Count
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Multiselect = false;//该值确定是否可以选择多个文件
             dialog.Title = "请选择图像文件";
-            dialog.Filter = "图像文件(*.jpg;*.jpeg;*.gif;*.png;*.bmp)|*.jpg;*.jpeg;*.gif;*.png;*.bmp";
+            dialog.Filter = "图像文件(*.jpg;*.jpeg;*.gif;*.png;*.bmp;*.tif;*.tiff)|*.jpg;*.jpeg;*.gif;*.png;*.bmpp;*.tif;*.tiff";
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 if(myRects.Count > 0) { Clear_all(); }  // 画布不干净则清空画布

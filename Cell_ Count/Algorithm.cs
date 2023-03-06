@@ -7,6 +7,7 @@ using OpenCvSharp;
 using System.IO;
 using System.Xml;
 using System.Xml.Linq;
+using System.Windows.Media;
 
 namespace Cell__Count
 {
@@ -47,12 +48,19 @@ namespace Cell__Count
             // 添加根元素到 XmlDocument 对象
             doc.AppendChild(root);
             int dropNum = 1;
-            double rating = 0.0001;    // 判别假阳性阈值
+            double avgarea = 0.0;
+            double rating = 0.01;    // 判别假阳性阈值
             int count = 0;
             for(int i= 0 ; i< n; i++)
             {
                 int area = info.At<int>(i, (int)ConnectedComponentsTypes.Area);
-                if ((double)area / winsize < rating){ dropNum++; continue; }    // 去除假阳性
+                if (i > 0)
+                {
+                    if (i == 1) avgarea = area;
+                    else if (area / avgarea < rating || area / winsize > rating) { dropNum++; continue; }   // 去除假阳性
+                    else avgarea = (avgarea * (count - 1) + area) / count;
+                }
+                //if ((double)area / winsize < rating) { dropNum++; continue; }    // 去除假阳性
                 int x = (int)info.At<int>(i, 0);   //左上角x坐标
                 int y = (int)info.At<int>(i, 1);   //左上角y坐标
                 int width = (int)info.At<int>(i, 2);   //细胞宽
@@ -89,7 +97,9 @@ namespace Cell__Count
             Cv2.GaussianBlur(src, src, new OpenCvSharp.Size(7, 7), 0, 0);
             Mat thresh = new Mat();
             Cv2.Threshold(src, thresh, 0, 255, ThresholdTypes.Otsu);       
-            Mat dilate = new Mat(); Mat element = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(3, 3)); Cv2.Erode(thresh, dilate, element);
+            Mat dilate = new Mat(); 
+            Mat element = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(3, 3)); 
+            Cv2.Erode(thresh, dilate, element);
             Mat labels = new Mat();
             Mat stats = new Mat();
             Mat centroids = new Mat();
@@ -116,6 +126,8 @@ namespace Cell__Count
             // 添加根元素到 XmlDocument 对象
             doc.AppendChild(root);
             int sub = 1;
+            double avgarea = 0.0;
+            double area = 0.0,rating = 0.01;
             for (int i = 0; i < n; i++)
             {
                 int x = (int)info.At<int>(i, 0);   //左上角x坐标
@@ -123,6 +135,13 @@ namespace Cell__Count
                 int width = (int)info.At<int>(i, 2);   //细胞宽
                 int height = (int)info.At<int>(i, 3);  // 细胞高
                 if (x < 0 || y < 0 || width < 0 || height < 0) { sub++; continue; }
+                area = width * height;
+                if (i > 0)
+                {
+                    if (i == 1) avgarea = area;
+                    else if (area / avgarea < rating) { sub++; continue; }   // 去除假阳性
+                    else avgarea = (avgarea * (i - sub - 1) + area) / (i - sub);
+                }
                 // 创建子节点
                 XmlElement CELL = doc.CreateElement("CELL");
                 // 创建子节点中的元素
@@ -149,16 +168,24 @@ namespace Cell__Count
         public int Water_Algorithm_solve(string filename)
         {
             Mat image = new Mat(filename, ImreadModes.Color);
+            //long area = image.Width * image.Height;
+            //long defaultSize = 1024 * 768;
+            //int count = 0;
+            //while (area / (1 << count) > defaultSize) count++;
+            //while (--count > 0)
+            //    Cv2.PyrDown(image, image);
             // 预处理
             // 边缘保留滤波EPF  去噪
             Mat blur = new Mat();
-            Cv2.PyrMeanShiftFiltering(image, blur, 21, 55);
+            //Cv2.PyrMeanShiftFiltering(image, blur, 21, 55);
+            Cv2.GaussianBlur(image, blur, new Size(3, 3), 0, 0);
             // 转成灰度图像
             Mat gray = new Mat();
             Cv2.CvtColor(blur, gray, ColorConversionCodes.BGR2GRAY);
             Mat binary = new Mat();
             // 得到二值图像区间阈值
-            Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+            Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Otsu);
+            //Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.Otsu | ThresholdTypes.Binary);
 
             // 距离变换
             Mat dist = new Mat();
@@ -167,7 +194,8 @@ namespace Cell__Count
             double  maxVal;
             Cv2.MinMaxLoc(dist, out _, out maxVal, out _, out _);
             Mat surface = new Mat();
-            Cv2.Threshold(dist, surface, 0.2 * maxVal, 255, ThresholdTypes.Binary);
+            //Cv2.Threshold(dist, surface,0.2*maxVal , 255, ThresholdTypes.Binary);
+            Cv2.Threshold(dist, surface, 0, 255, ThresholdTypes.Binary);
             Mat sure_fg = new Mat();
             surface.ConvertTo(sure_fg, MatType.CV_8UC1);// 转成8位整型
 
@@ -181,13 +209,13 @@ namespace Cell__Count
             // 未知区域标记(不能确定是前景还是背景)
             Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(3, 3));
             Mat binary_dilate = new Mat();
-            Cv2.Erode(binary, binary_dilate, kernel, iterations: 1);
+            Cv2.Dilate(binary, binary_dilate, kernel, iterations: 1);
             Mat unknown = binary_dilate - sure_fg;
             // 未知区域标记为0
             Cv2.Threshold(unknown, unknown, thresh: 254, maxval: 0, type: ThresholdTypes.TozeroInv);
             labels.SetTo(0, unknown);
             // 区域标记结果
-            Mat markers_show = labels.ConvertScaleAbs(100);
+            Mat markers_show = labels.ConvertScaleAbs();
 
             // 分水岭算法分割
             Cv2.Watershed(image, labels);

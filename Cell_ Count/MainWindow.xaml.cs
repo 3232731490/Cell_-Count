@@ -118,7 +118,7 @@ namespace Cell__Count
                     this.files.Clear(); // 清除目前已保存的文件夹中的文件名
                     DirectoryInfo folder = new DirectoryInfo(check_path);
                     var fs = folder.GetFiles();
-                    Regex re = new Regex("^*.(jpg|png|bmp|gif|jpeg)$"); // 判断是否为图像
+                    Regex re = new Regex("^*.(jpg|png|bmp|gif|jpeg|tif|tiff)$"); // 判断是否为图像
                     foreach (FileInfo file in fs)
                     {
                         if (re.IsMatch(file.Name))
@@ -153,7 +153,7 @@ namespace Cell__Count
             {
                 DirectoryInfo folder = new DirectoryInfo(file_basepath);
                 var fs = folder.GetFiles();
-                Regex re = new Regex("^*.(jpg|png|bmp|gif|jpeg)$"); // 判断是否为图像
+                Regex re = new Regex("^*.(jpg|png|bmp|gif|jpeg|tif|tiff)$"); // 判断是否为图像
                 foreach (FileInfo file in fs)
                 {
                     if (re.IsMatch(file.Name))
